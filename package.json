@@ -1,0 +1,44 @@
+{
+  "name": "groupe-nanei-api",
+  "version": "1.0.0",
+  "description": "Groupe Nanei — API du site vitrine (devis, admin)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "migrate": "sequelize-cli db:migrate",
+    "migrate:undo": "sequelize-cli db:migrate:undo",
+    "migrate:status": "sequelize-cli db:migrate:status",
+    "seed:admin": "node -r dotenv/config src/scripts/seedAdmin.js",
+    "docker:dev": "docker compose up --build",
+    "docker:prod": "docker compose -f docker-compose.prod.yml up -d --build",
+    "docker:prod:logs": "docker compose -f docker-compose.prod.yml logs -f backend",
+    "docker:prod:down": "docker compose -f docker-compose.prod.yml down",
+    "test": "jest"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "joi": "^18.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.11.0",
+    "pg": "^8.18.0",
+    "pg-hstore": "^2.3.4",
+    "resend": "^6.18.1",
+    "sequelize": "^6.37.7",
+    "sequelize-cli": "^6.6.5",
+    "uuid": "^11.1.1",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.2.2"
+  }
+}
