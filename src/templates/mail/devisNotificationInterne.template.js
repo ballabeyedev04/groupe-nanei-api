@@ -1,22 +1,36 @@
-const { enveloppe } = require('./layout');
+const { enveloppe, carteInfo, badge } = require('./layout');
 
 // Prévient l'équipe interne dès qu'une demande arrive, avec l'essentiel pour
 // juger de l'urgence sans avoir à ouvrir l'admin.
 function devisNotificationInterneHtml({ nom, societe, telephone, email, ville, typeBesoin, message }) {
+  const corps = `
+    <p style="margin:0 0 4px;">${badge('Nouvelle demande', '#0A5EA8', '#E6F1FB')}</p>
+
+    ${carteInfo(
+      [
+        { label: 'Nom', valeur: `<strong>${nom}</strong>`, icone: '👤' },
+        { label: 'Société', valeur: societe, icone: '🏢' },
+        { label: 'Téléphone', valeur: `<a href="tel:${telephone}" style="color:#0A5EA8;text-decoration:none;">${telephone}</a>`, icone: '📞' },
+        { label: 'E-mail', valeur: `<a href="mailto:${email}" style="color:#0A5EA8;text-decoration:none;">${email}</a>`, icone: '✉️' },
+        { label: 'Ville / chantier', valeur: ville, icone: '📍' },
+        { label: 'Type de besoin', valeur: typeBesoin, icone: '🧰' },
+      ],
+      { titre: 'Coordonnées du demandeur' }
+    )}
+
+    <div style="margin-top:6px;">
+      <div style="color:#0A5EA8;font-size:12px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px;">Message</div>
+      <p style="margin:0;padding:16px 18px;background:#EAF6FF;border-radius:10px;white-space:pre-wrap;">${message}</p>
+    </div>
+
+    <p style="margin:22px 0 0;">Ouvrez l'espace admin pour répondre directement au demandeur.</p>
+  `;
+
   return enveloppe({
     preheader: `Nouvelle demande de devis — ${nom}`,
     titre: 'Nouvelle demande de devis',
-    corps: `
-      <table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;">
-        <tr><td style="color:#5B7A93;width:120px;">Nom</td><td><strong>${nom}</strong></td></tr>
-        ${societe ? `<tr><td style="color:#5B7A93;">Société</td><td>${societe}</td></tr>` : ''}
-        <tr><td style="color:#5B7A93;">Téléphone</td><td><a href="tel:${telephone}" style="color:#0A5EA8;">${telephone}</a></td></tr>
-        <tr><td style="color:#5B7A93;">E-mail</td><td><a href="mailto:${email}" style="color:#0A5EA8;">${email}</a></td></tr>
-        ${ville ? `<tr><td style="color:#5B7A93;">Ville / chantier</td><td>${ville}</td></tr>` : ''}
-        ${typeBesoin ? `<tr><td style="color:#5B7A93;">Besoin</td><td>${typeBesoin}</td></tr>` : ''}
-      </table>
-      <p style="margin-top:16px;padding:12px 16px;background:#EAF6FF;border-radius:8px;white-space:pre-wrap;">${message}</p>
-    `,
+    soustitre: 'Reçue depuis le site vitrine',
+    corps,
   });
 }
 

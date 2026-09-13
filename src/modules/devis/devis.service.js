@@ -82,7 +82,7 @@ async function repondre(id, { sujet, message }, adminId) {
   const resultat = await emailService.envoyer({
     to: devis.email,
     subject: sujet,
-    html: devisReponseHtml({ nom: devis.nom, message }),
+    html: devisReponseHtml({ devis, message }),
   });
   if (!resultat) {
     // Ici on informe l'admin de l'échec (contrairement à la confirmation
