@@ -8,6 +8,9 @@ const env = require('./config/env');
 const authRoutes = require('./modules/auth/auth.route');
 const devisRoutes = require('./modules/devis/devis.route');
 const dashboardRoutes = require('./modules/dashboard/dashboard.route');
+const coordonneesRoutes = require('./modules/coordonnees/coordonnees.route');
+const actualiteRoutes = require('./modules/actualites/actualite.route');
+const publicRoutes = require('./modules/public/public.route');
 const notFound = require('./middlewares/notFound.middleware');
 const errorHandler = require('./middlewares/errorHandler.middleware');
 
@@ -33,6 +36,9 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/devis', devisRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/coordonnees', coordonneesRoutes);
+app.use('/api/v1/actualites', actualiteRoutes);
+app.use('/api/v1/public', publicRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
