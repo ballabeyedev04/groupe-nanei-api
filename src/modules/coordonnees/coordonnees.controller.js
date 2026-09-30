@@ -6,8 +6,13 @@ const obtenir = asyncHandler(async (req, res) => {
   res.json({ succes: true, coordonnees });
 });
 
-const enregistrer = asyncHandler(async (req, res) => {
-  const coordonnees = await coordonneesService.creerOuMettreAJour(req.body);
+const creer = asyncHandler(async (req, res) => {
+  const coordonnees = await coordonneesService.creer(req.body);
+  res.status(201).json({ succes: true, coordonnees });
+});
+
+const mettreAJour = asyncHandler(async (req, res) => {
+  const coordonnees = await coordonneesService.mettreAJour(req.body);
   res.json({ succes: true, coordonnees });
 });
 
@@ -16,4 +21,4 @@ const supprimer = asyncHandler(async (req, res) => {
   res.json({ succes: true });
 });
 
-module.exports = { obtenir, enregistrer, supprimer };
+module.exports = { obtenir, creer, mettreAJour, supprimer };

@@ -9,7 +9,8 @@ const requireAuth = require('../../middlewares/auth.middleware');
 const router = express.Router();
 
 router.get('/', requireAuth, controller.obtenir);
-router.put('/', requireAuth, validate(enregistrerCoordonneesSchema), controller.enregistrer);
+router.post('/', requireAuth, validate(enregistrerCoordonneesSchema), controller.creer);
+router.put('/', requireAuth, validate(enregistrerCoordonneesSchema), controller.mettreAJour);
 router.delete('/', requireAuth, controller.supprimer);
 
 module.exports = router;

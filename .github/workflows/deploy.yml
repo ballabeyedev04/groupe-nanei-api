@@ -1,0 +1,74 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Un seul déploiement à la fois : un push arrivé pendant un déploiement
+# attend la fin du précédent au lieu de rebuilder en parallèle sur le VPS.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # ── Tests : bloquent le déploiement s'ils échouent ─────────────────────────
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+
+      # Les tests mockent la base : pas besoin de Postgres ici.
+      - run: npm test
+
+  # ── Déploiement ────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: "20m"
+          script: |
+            set -e
+            cd /var/www/groupe-nanei-api
+
+            # Récupérer le nouveau code — `set -e` fait échouer tout le
+            # déploiement si le pull échoue (ex: problème d'authentification),
+            # au lieu de continuer silencieusement avec l'ancien code.
+            # --rebase : rejoue d'éventuels commits locaux au VPS par-dessus.
+            git pull --rebase origin main
+
+            # Rebuilder et relancer uniquement le backend (PostgreSQL reste
+            # intact). Les migrations sont appliquées par docker-entrypoint.sh
+            # au démarrage du conteneur.
+            docker compose -f docker-compose.prod.yml up -d --build backend
+
+            # Vérifier que le backend répond (migrations + démarrage)
+            for i in $(seq 1 12); do
+              if curl -fsS http://127.0.0.1:3001/health; then
+                echo ""
+                echo "Backend opérationnel."
+                docker image prune -f
+                exit 0
+              fi
+              sleep 5
+            done
+            echo "Le backend ne répond pas après 60 s :"
+            docker compose -f docker-compose.prod.yml logs --tail=80 backend
+            exit 1

@@ -14,21 +14,28 @@ async function obtenir() {
   return obtenirLigneUnique();
 }
 
-async function creerOuMettreAJour(data) {
-  const existant = await obtenirLigneUnique();
-  const valeurs = {
+function normaliser(data) {
+  return {
     telephone: data.telephone || null,
     email: data.email || null,
     adresse: data.adresse || null,
   };
+}
 
-  if (existant) {
-    existant.set(valeurs);
-    await existant.save();
-    return existant;
-  }
+// "Ajouter" dans l'admin : refusé s'il existe déjà une ligne — c'est ce qui
+// garantit qu'il n'y en a jamais deux (l'admin masque d'ailleurs le bouton).
+async function creer(data) {
+  const existant = await obtenirLigneUnique();
+  if (existant) throw new AppError('Les informations de contact existent déjà : modifiez-les plutôt.', 409);
+  return Coordonnees.create(normaliser(data));
+}
 
-  return Coordonnees.create(valeurs);
+async function mettreAJour(data) {
+  const existant = await obtenirLigneUnique();
+  if (!existant) throw new AppError('Aucune information de contact à modifier.', 404);
+  existant.set(normaliser(data));
+  await existant.save();
+  return existant;
 }
 
 async function supprimer() {
@@ -37,4 +44,4 @@ async function supprimer() {
   await existant.destroy();
 }
 
-module.exports = { obtenir, creerOuMettreAJour, supprimer };
+module.exports = { obtenir, creer, mettreAJour, supprimer };

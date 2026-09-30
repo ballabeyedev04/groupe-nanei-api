@@ -1,0 +1,97 @@
+# ============================================================
+#  Groupe Nanei API — Docker Compose PRODUCTION
+#  Usage : docker compose -f docker-compose.prod.yml up -d --build
+#
+#  Prérequis :
+#   • Fichier .env rempli (copie de .env.example)
+#   • Nginx + certificat Let's Encrypt installés sur l'hôte (deploy/nginx.conf)
+#
+#  Les migrations sont appliquées automatiquement au démarrage du conteneur
+#  backend (voir docker-entrypoint.sh).
+# ============================================================
+
+services:
+
+  # ── PostgreSQL ─────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: groupe_nanei_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:            ${DB_NAME}
+      POSTGRES_USER:          ${DB_USER}
+      POSTGRES_PASSWORD:      ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS:   "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Script d'init optionnel (ex: création extension pgcrypto)
+      - ./deploy/initdb:/docker-entrypoint-initdb.d:ro
+    # PAS d'exposition du port en production — accessible uniquement via le réseau Docker
+    expose:
+      - "5432"
+    networks:
+      - groupe_nanei_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Backend Node.js ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    image: groupe-nanei-api:latest
+    container_name: groupe_nanei_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Nginx écoute sur 443 et proxifie vers 127.0.0.1:3001. Port hôte 3001
+    # (et non 3000) pour cohabiter avec une autre API déjà sur le VPS ;
+    # publié sur la loopback uniquement pour que seul Nginx y accède.
+    ports:
+      - "127.0.0.1:3001:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV:    production
+      PORT:        3000
+      HOST:        0.0.0.0
+      DB_HOST:     postgres
+      DB_PORT:     5432
+      DB_SSL:      "false"
+    volumes:
+      - logs_data:/app/logs
+    networks:
+      - groupe_nanei_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    # Limites ressources (adapter selon VPS)
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 96M
+
+networks:
+  groupe_nanei_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  logs_data:
+    driver: local

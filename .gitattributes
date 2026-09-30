@@ -1,0 +1,5 @@
+# Scripts exécutés sur le VPS Linux : des fins de ligne CRLF (clone Windows)
+# cassent le shebang et les commandes bash.
+*.sh  text eol=lf
+*.yml text eol=lf
+*.conf text eol=lf
