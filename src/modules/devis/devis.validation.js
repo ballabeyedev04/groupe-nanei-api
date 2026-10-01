@@ -9,6 +9,10 @@ const creerDevisSchema = Joi.object({
   telephone: Joi.string().trim().min(6).max(30).required(),
   email: Joi.string().trim().email().max(255).required(),
   ville: Joi.string().trim().max(150).allow('', null),
+  typesBesoin: Joi.array().items(Joi.string().trim().min(1).max(150)).max(15).default([]),
+  // Ancien champ à valeur unique : encore accepté pour qu'un visiteur ayant
+  // l'ancienne version du site en cache puisse toujours envoyer sa demande.
+  // Fusionné dans typesBesoin par le service.
   typeBesoin: Joi.string().trim().max(150).allow('', null),
   message: Joi.string().trim().min(5).max(4000).required(),
   consentementRgpd: Joi.boolean().valid(true).required().messages({

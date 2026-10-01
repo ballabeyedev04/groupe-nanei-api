@@ -19,7 +19,8 @@ const Devis = sequelize.define(
     telephone: { type: DataTypes.STRING(30), allowNull: false },
     email: { type: DataTypes.STRING(255), allowNull: false, validate: { isEmail: true } },
     ville: { type: DataTypes.STRING(150), allowNull: true },
-    typeBesoin: { type: DataTypes.STRING(150), allowNull: true },
+    // Plusieurs besoins possibles par demande (ex. bennes + contrôle des accès).
+    typesBesoin: { type: DataTypes.ARRAY(DataTypes.STRING(150)), allowNull: false, defaultValue: [] },
     message: { type: DataTypes.TEXT, allowNull: false },
     consentementRgpd: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
 

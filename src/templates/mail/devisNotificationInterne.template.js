@@ -1,8 +1,8 @@
-const { enveloppe, carteInfo, badge } = require('./layout');
+const { enveloppe, carteInfo, badge, listeBesoins } = require('./layout');
 
 // Prévient l'équipe interne dès qu'une demande arrive, avec l'essentiel pour
 // juger de l'urgence sans avoir à ouvrir l'admin.
-function devisNotificationInterneHtml({ nom, societe, telephone, email, ville, typeBesoin, message }) {
+function devisNotificationInterneHtml({ nom, societe, telephone, email, ville, typesBesoin, message }) {
   const corps = `
     <p style="margin:0 0 4px;">${badge('Nouvelle demande', '#0A5EA8', '#E6F1FB')}</p>
 
@@ -13,7 +13,7 @@ function devisNotificationInterneHtml({ nom, societe, telephone, email, ville, t
         { label: 'Téléphone', valeur: `<a href="tel:${telephone}" style="color:#0A5EA8;text-decoration:none;">${telephone}</a>`, icone: '📞' },
         { label: 'E-mail', valeur: `<a href="mailto:${email}" style="color:#0A5EA8;text-decoration:none;">${email}</a>`, icone: '✉️' },
         { label: 'Ville / chantier', valeur: ville, icone: '📍' },
-        { label: 'Type de besoin', valeur: typeBesoin, icone: '🧰' },
+        { label: 'Besoins', valeur: listeBesoins(typesBesoin), icone: '🧰' },
       ],
       { titre: 'Coordonnées du demandeur' }
     )}

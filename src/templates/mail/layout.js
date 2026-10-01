@@ -100,4 +100,19 @@ function badge(texte, couleur = '#0A5EA8', fond = '#E6F1FB') {
   return `<span style="display:inline-block;background:${fond};color:${couleur};font-size:11.5px;font-weight:700;letter-spacing:0.03em;padding:4px 12px;border-radius:999px;">${texte}</span>`;
 }
 
-module.exports = { enveloppe, carteInfo, badge };
+function echapper(texte) {
+  return String(texte)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// Besoins cochés par le visiteur, un par ligne ; null si aucun, pour que
+// carteInfo masque la ligne. Valeurs saisies côté client : échappées.
+function listeBesoins(besoins) {
+  if (!besoins?.length) return null;
+  return besoins.map((b) => `• ${echapper(b)}`).join('<br/>');
+}
+
+module.exports = { enveloppe, carteInfo, badge, listeBesoins };

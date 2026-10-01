@@ -7,6 +7,13 @@ const { devisReponseHtml } = require('../../templates/mail/devisReponse.template
 const env = require('../../config/env');
 const AppError = require('../../utils/AppError');
 
+// Réunit la liste de besoins et l'ancien champ unique (voir la validation),
+// sans doublon ni valeur vide, dans l'ordre choisi par le visiteur.
+function normaliserBesoins({ typesBesoin = [], typeBesoin }) {
+  const tous = [...typesBesoin, ...(typeBesoin ? [typeBesoin] : [])];
+  return [...new Set(tous.map((b) => String(b).trim()).filter(Boolean))];
+}
+
 async function creer(data, meta) {
   // Honeypot rempli → très probablement un robot. On répond succès (pour ne
   // pas lui apprendre que son remplissage a été détecté) sans rien créer ni
@@ -21,7 +28,7 @@ async function creer(data, meta) {
     telephone: data.telephone,
     email: data.email,
     ville: data.ville || null,
-    typeBesoin: data.typeBesoin || null,
+    typesBesoin: normaliserBesoins(data),
     message: data.message,
     consentementRgpd: data.consentementRgpd,
     ip: meta?.ip || null,

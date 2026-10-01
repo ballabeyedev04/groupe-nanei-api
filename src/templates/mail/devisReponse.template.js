@@ -1,4 +1,4 @@
-const { enveloppe, carteInfo, badge } = require('./layout');
+const { enveloppe, carteInfo, badge, listeBesoins } = require('./layout');
 
 // Envoyé au demandeur quand l'admin clique « Répondre » — contient à la
 // fois le message rédigé par l'admin ET un récapitulatif complet de la
@@ -21,7 +21,7 @@ function devisReponseHtml({ devis, message }) {
         { label: 'Téléphone', valeur: devis.telephone, icone: '📞' },
         { label: 'E-mail', valeur: devis.email, icone: '✉️' },
         { label: 'Ville / chantier', valeur: devis.ville, icone: '📍' },
-        { label: 'Type de besoin', valeur: devis.typeBesoin, icone: '🧰' },
+        { label: 'Vos besoins', valeur: listeBesoins(devis.typesBesoin), icone: '🧰' },
         { label: 'Votre message initial', valeur: devis.message ? String(devis.message).replace(/\n/g, '<br/>') : null, icone: '💬' },
       ],
       { titre: 'Récapitulatif de votre demande' }
