@@ -100,6 +100,8 @@ function badge(texte, couleur = '#0A5EA8', fond = '#E6F1FB') {
   return `<span style="display:inline-block;background:${fond};color:${couleur};font-size:11.5px;font-weight:700;letter-spacing:0.03em;padding:4px 12px;border-radius:999px;">${texte}</span>`;
 }
 
+// Neutralise le HTML des valeurs saisies par le visiteur (ou l'admin) avant
+// insertion dans un e-mail — corps de texte comme attributs entre guillemets.
 function echapper(texte) {
   return String(texte)
     .replace(/&/g, '&amp;')
@@ -115,4 +117,4 @@ function listeBesoins(besoins) {
   return besoins.map((b) => `• ${echapper(b)}`).join('<br/>');
 }
 
-module.exports = { enveloppe, carteInfo, badge, listeBesoins };
+module.exports = { enveloppe, carteInfo, badge, listeBesoins, echapper };
