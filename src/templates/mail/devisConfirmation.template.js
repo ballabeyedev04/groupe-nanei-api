@@ -1,11 +1,11 @@
-const { enveloppe, badge } = require('./layout');
+const { enveloppe, badge, echapper } = require('./layout');
 
 // Accusé de réception envoyé au visiteur juste après sa demande — rassure
 // sur la bonne prise en compte sans présumer d'un délai de réponse précis.
 function devisConfirmationHtml({ nom }) {
   const corps = `
     <p style="margin:0 0 4px;">${badge('Demande reçue', '#0A5EA8', '#E6F1FB')}</p>
-    <p style="margin:16px 0 0;">Bonjour ${nom},</p>
+    <p style="margin:16px 0 0;">Bonjour ${echapper(nom)},</p>
     <p style="margin:12px 0 0;">
       Merci pour votre demande. Notre équipe l'étudie et revient vers vous dans les meilleurs délais pour échanger
       sur votre chantier et vos besoins logistiques.
