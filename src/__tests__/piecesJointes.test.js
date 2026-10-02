@@ -70,21 +70,20 @@ describe('middleware piecesJointes', () => {
     expect(corps.message).toMatch(/5 pièces jointes maximum/);
   });
 
-  it('refuse un fichier trop lourd', async () => {
+  it('refuse un fichier de plus de 3 Mo', async () => {
     const { statut, corps } = await envoyer(serveur, [{ nom: 'gros.pdf', contenu: Buffer.alloc(MAX_PAR_FICHIER + 1) }]);
 
+    expect(MAX_PAR_FICHIER).toBe(3 * 1024 * 1024);
     expect(statut).toBe(413);
-    expect(corps.message).toMatch(/taille maximale/);
+    expect(corps.message).toBe('Veuillez mettre un fichier inférieur à 3 Mo.');
   });
 
-  it('refuse plus de 20 Mo au total', async () => {
-    const neufMo = Buffer.alloc(9 * 1024 * 1024);
-    const fichiers = [1, 2, 3].map((i) => ({ nom: `partie-${i}.pdf`, contenu: neufMo }));
-    const { statut, corps } = await envoyer(serveur, fichiers);
+  it('accepte un fichier de 3 Mo pile', async () => {
+    const { statut } = await envoyer(serveur, [{ nom: 'limite.pdf', contenu: Buffer.alloc(MAX_PAR_FICHIER) }]);
 
-    expect(statut).toBe(413);
-    expect(corps.message).toMatch(/au total/);
+    expect(statut).toBe(200);
   });
+
 
   it('laisse passer une requête JSON sans fichier', async () => {
     const reponse = await fetch(`http://127.0.0.1:${serveur.address().port}/test`, {

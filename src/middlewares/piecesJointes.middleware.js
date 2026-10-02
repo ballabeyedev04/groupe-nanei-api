@@ -4,11 +4,11 @@ const AppError = require('../utils/AppError');
 
 // Pièces jointes de la réponse à une demande de devis. Gardées en mémoire le
 // temps de l'envoi (jamais écrites sur le disque du serveur) puis transmises
-// à Resend. Limites choisies sous le plafond de Resend (40 Mo par e-mail,
-// pièces jointes encodées en base64, soit environ +33 %).
+// à Resend. 5 fichiers de 3 Mo au plus : 15 Mo au total, bien sous le
+// plafond de Resend (40 Mo par e-mail, base64 compris, soit environ +33 %).
 const MAX_FICHIERS = 5;
-const MAX_PAR_FICHIER = 10 * 1024 * 1024;
-const MAX_TOTAL = 20 * 1024 * 1024;
+const MAX_PAR_FICHIER = 3 * 1024 * 1024;
+const MESSAGE_TROP_LOURD = 'Veuillez mettre un fichier inférieur à 3 Mo.';
 
 // Documents courants d'un devis. Pas d'exécutable ni d'archive : souvent
 // bloqués par les messageries des destinataires.
@@ -45,7 +45,7 @@ const upload = multer({
 }).array('piecesJointes', MAX_FICHIERS);
 
 const MESSAGES_MULTER = {
-  LIMIT_FILE_SIZE: `Un fichier dépasse la taille maximale de ${MAX_PAR_FICHIER / 1024 / 1024} Mo.`,
+  LIMIT_FILE_SIZE: MESSAGE_TROP_LOURD,
   LIMIT_FILE_COUNT: `${MAX_FICHIERS} pièces jointes maximum par réponse.`,
   LIMIT_UNEXPECTED_FILE: `${MAX_FICHIERS} pièces jointes maximum par réponse.`,
 };
@@ -61,14 +61,9 @@ function piecesJointes(req, res, next) {
     if (err) return next(err);
 
     const fichiers = req.files || [];
-    const total = fichiers.reduce((somme, f) => somme + f.size, 0);
-    if (total > MAX_TOTAL) {
-      return next(new AppError(`Les pièces jointes dépassent ${MAX_TOTAL / 1024 / 1024} Mo au total.`, 413));
-    }
-
     req.piecesJointes = fichiers.map((f) => ({ nom: nomFichier(f.originalname), contenu: f.buffer, taille: f.size }));
     return next();
   });
 }
 
-module.exports = { piecesJointes, nomFichier, extensionAutorisee, MAX_FICHIERS, MAX_PAR_FICHIER, MAX_TOTAL, EXTENSIONS };
+module.exports = { piecesJointes, nomFichier, extensionAutorisee, MAX_FICHIERS, MAX_PAR_FICHIER, EXTENSIONS };
