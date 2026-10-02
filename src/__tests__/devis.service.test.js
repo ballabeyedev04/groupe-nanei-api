@@ -60,6 +60,18 @@ describe('devisService.repondre', () => {
     expect(devisMock.save).toHaveBeenCalledTimes(1);
   });
 
+  it("refuse de répondre une seconde fois à une demande déjà traitée, sans envoyer d'e-mail", async () => {
+    const devisMock = { ...fabriquerDevisMock(), statut: 'traite' };
+    Devis.findByPk.mockResolvedValue(devisMock);
+
+    await expect(
+      devisService.repondre('d1', { sujet: 'Relance', message: 'Bonjour' }, 'admin-1')
+    ).rejects.toMatchObject({ statusCode: 409 });
+
+    expect(emailService.envoyer).not.toHaveBeenCalled();
+    expect(devisMock.save).not.toHaveBeenCalled();
+  });
+
   it("ne modifie jamais le statut si l'envoi de l'e-mail échoue", async () => {
     const devisMock = fabriquerDevisMock();
     Devis.findByPk.mockResolvedValue(devisMock);

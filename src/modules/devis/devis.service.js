@@ -85,6 +85,11 @@ async function obtenir(id) {
 
 async function repondre(id, { sujet, message }, adminId) {
   const devis = await obtenir(id);
+  // Une demande traitée est close (l'admin n'affiche plus le formulaire) :
+  // refusé aussi ici, contre un double envoi depuis un onglet resté ouvert.
+  if (devis.statut === 'traite') {
+    throw new AppError('Cette demande a déjà été traitée : une réponse a déjà été envoyée.', 409);
+  }
 
   const resultat = await emailService.envoyer({
     to: devis.email,
