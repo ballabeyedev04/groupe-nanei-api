@@ -83,7 +83,7 @@ async function obtenir(id) {
   return devis;
 }
 
-async function repondre(id, { sujet, message }, adminId) {
+async function repondre(id, { sujet, message }, adminId, piecesJointes = []) {
   const devis = await obtenir(id);
   // Une demande traitée est close (l'admin n'affiche plus le formulaire) :
   // refusé aussi ici, contre un double envoi depuis un onglet resté ouvert.
@@ -95,6 +95,7 @@ async function repondre(id, { sujet, message }, adminId) {
     to: devis.email,
     subject: sujet,
     html: devisReponseHtml({ devis, message }),
+    piecesJointes,
   });
   if (!resultat) {
     // Ici on informe l'admin de l'échec (contrairement à la confirmation
@@ -106,6 +107,7 @@ async function repondre(id, { sujet, message }, adminId) {
   devis.statut = 'traite';
   devis.reponseSujet = sujet;
   devis.reponseMessage = message;
+  devis.reponsePiecesJointes = piecesJointes.map(({ nom, taille }) => ({ nom, taille }));
   devis.reponduLe = new Date();
   devis.reponduParId = adminId;
   await devis.save();

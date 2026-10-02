@@ -33,6 +33,9 @@ const Devis = sequelize.define(
     // Réponse envoyée depuis l'admin (bouton "Répondre" → e-mail via Resend).
     reponseSujet: { type: DataTypes.STRING(255), allowNull: true },
     reponseMessage: { type: DataTypes.TEXT, allowNull: true },
+    // [{ nom, taille }] des fichiers joints à la réponse — les fichiers eux-
+    // mêmes ne sont pas conservés, seulement leur trace pour l'historique.
+    reponsePiecesJointes: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
     reponduLe: { type: DataTypes.DATE, allowNull: true },
     reponduParId: { type: DataTypes.UUID, allowNull: true },
 

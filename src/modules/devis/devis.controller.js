@@ -18,7 +18,7 @@ const obtenir = asyncHandler(async (req, res) => {
 });
 
 const repondre = asyncHandler(async (req, res) => {
-  const devis = await devisService.repondre(req.params.id, req.body, req.admin.id);
+  const devis = await devisService.repondre(req.params.id, req.body, req.admin.id, req.piecesJointes);
   res.json({ succes: true, devis });
 });
 
